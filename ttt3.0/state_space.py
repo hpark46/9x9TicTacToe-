@@ -1,8 +1,8 @@
 #state
 def initialize(playtype):   #input x or o
 	
-	board = []
-	cell = [['.', '.', '.'],['.', '.', '.'],['.', '.', '.']]
+	board = []       #9x9 board (main board)
+	cell = [['.', '.', '.'],['.', '.', '.'],['.', '.', '.']]     #child board 
 	for num in range(0,9):
 		board.append(cell)
 
@@ -10,37 +10,43 @@ def initialize(playtype):   #input x or o
 	turn = 'x'
 	player = playtype
 
-	return board, turn, player
+	return board, turn, player      # 9 x 3x3 , x/o , x/o
 
 
 
-#action
-def actions(board):
+#action (possible actions inside specific child board)
+
+def actions(board, child):     # board, previous action performed (i,j)
+
+
+
+	target = board[translate_output(child)]   #specific board for next move
+
 	moves = []
 	for i in range(0,3):
 		for j in range(0,3):
-			if (board[i][j] == '.'):
-				# actions.append(i*3 + j)
+			if (target[i][j] == '.'):
+
 				moves.append((i,j))
 
 	return moves
 
 
 
-#transition_model
-def transition_model(board, action, turn):
+#transition_model		child (previous action) given as (i,j)
+def transition_model(board, action, turn, child):
 
-	return result(board, action, turn), toggle_turn(turn)
-
-
+	return result(board, action, turn, child), toggle_turn(turn)
 
 
-def result(board, action, turn):
+
+# action returned for determining next target child board 
+def result(board, action, turn, child): 
 
 	(i,j) = action
 	board[i][j] = turn
 
-	return board
+	return board, action
 
 
 
@@ -96,6 +102,26 @@ def terminal_test(board): # 'd': draw  'o'/'x': winner  'n': not terminated
 
 
 
+def translate_output(action):      
+
+	if (action == (0,0)):
+		return 0
+	elif (action == (0,1)):
+		return 1
+	elif (action == (0,2)):
+		return 2
+	elif (action == (1,0)):
+		return 3
+	elif (action == (1,1)):
+		return 4
+	elif (action == (1,2)):
+		return 5
+	elif (action == (2,0)):
+		return 6
+	elif (action == (2,1)):
+		return 7
+	else:
+		return 8						
 
 
 
