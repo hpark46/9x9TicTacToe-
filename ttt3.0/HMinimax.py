@@ -2,7 +2,7 @@ import math
 from state_space import *
 
 
-def minimax(board, turn, player):
+def hminimax(board, turn, player):
 
 	moves = actions(board) #possible moves on board
 	best_util = -math.inf
@@ -92,30 +92,17 @@ def min_value(board, turn, player):
 
 
 
-def utility(status, player):
-
-	if (status == 'd'):
-		return 0
-
-	elif (status == 'o'):       
+def eval(board, player):
+	for child in board:
 		
-		if (player == 'o'):
-			return 1
-		else:
-			return -1
-
-
-	elif (status == 'x'):
-
-		if (player == 'o'):
-			return -1
-
-		else:
-			return 1	
 
 
 
 
+
+
+def cutoff_test(board, depth):
+	if (depth == )
 
 
 

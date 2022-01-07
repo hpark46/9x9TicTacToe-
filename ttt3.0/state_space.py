@@ -18,8 +18,6 @@ def initialize(playtype):   #input x or o
 
 def actions(board, child):     # board, previous action performed (i,j)
 
-
-
 	target = board[translate_output(child)]   #specific board for next move
 
 	moves = []
@@ -34,6 +32,7 @@ def actions(board, child):     # board, previous action performed (i,j)
 
 
 #transition_model		child (previous action) given as (i,j)
+
 def transition_model(board, action, turn, child):
 
 	return result(board, action, turn, child), toggle_turn(turn)
@@ -43,10 +42,12 @@ def transition_model(board, action, turn, child):
 # action returned for determining next target child board 
 def result(board, action, turn, child): 
 
+	target = board[translate_output(child)]
 	(i,j) = action
-	board[i][j] = turn
 
-	return board, action
+	target[i][j] = turn
+
+	return board, action #child
 
 
 
@@ -62,8 +63,11 @@ def toggle_turn(turn):
 
 #terminal state
 
+# terminal test on the child board of last placed action
+def terminal_test(main_board, previous_action): # 'd': draw  'o'/'x': winner  'n': not terminated
 
-def terminal_test(board): # 'd': draw  'o'/'x': winner  'n': not terminated
+	board = main_board[translate_output(previous_action)]
+
 
 	for row in board:
 		if (row[0] == row[1] == row[2] != '.'):
@@ -137,9 +141,12 @@ def print_board(board):
 
 
 
-def valid_move(board, move):
+def valid_move(board, move, child):
+
+	target = board[translate_output(child)]
+
 	(i,j) = move
-	if (board[i][j] == '.'):
+	if (target[i][j] == '.'):
 		return True
 
 	else:
