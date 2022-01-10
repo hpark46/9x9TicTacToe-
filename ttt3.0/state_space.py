@@ -1,8 +1,10 @@
+import random
+
 #state
 def initialize(playtype):   #input x or o
 	
 	board = []       #9x9 board (main board)
-	cell = [['.', '.', '.'],['.', '.', '.'],['.', '.', '.']]     #child board 
+	cell = [['.', '.', '.'],['.', '.', '.'],['.', '.', '.']]      #[k][i][j]
 	for num in range(0,9):
 		board.append(cell)
 
@@ -10,49 +12,63 @@ def initialize(playtype):   #input x or o
 	turn = 'x'
 	player = playtype
 
-	return board, turn, player      # 9 x 3x3 , x/o , x/o
+	return board, turn, player, (-1,-1,-1)      # 9 x 3x3 , x/o , x/o, initial previous action
 
 
 
-#action (possible actions inside specific child board)
+#action (possible actions inside specific child board or any board (if child board is terminated (draw)))
 
-def actions(board, child):     # board, previous action performed (i,j)
+def actions(board, child):     # board, previous action performed (k,i,j)
 
-	target = board[translate_output(child)]   #specific board for next move
+	target = -1                # target board for next move
+	(child_k, child_i, child_j) = child
+
+	if (child == (-1,-1,-1)):
+		target = random.randint(0,8)  #b/c I do not have positional evaluation, used random
+
+	else:
+		target = translate_output(child)
+
 
 	moves = []
+
 	for i in range(0,3):
 		for j in range(0,3):
-			if (target[i][j] == '.'):
+			if (board[target][i][j] == '.'):
+				moves.append((target,i,j))      # (k,i,j)
 
-				moves.append((i,j))
+
+	#check if there are no possible moves at the target (draw), if there are no moves, player can place anywhere
+	if (len(moves) == 0):
+		for k in range(0,9):
+			for i in range(0,3):
+				for j in range(0,3):
+					moves.append( (k,i,j) )
+
 
 	return moves
 
 
 
-#transition_model		child (previous action) given as (i,j)
+def transition_model(board, action, turn):
 
-def transition_model(board, action, turn, child):
-
-	return result(board, action, turn, child), toggle_turn(turn)
-
+	#      updated board 				toggled turn       performed action
+	return result(board, action, turn), toggle_turn(turn), action    
 
 
-# action returned for determining next target child board 
-def result(board, action, turn, child): 
 
-	target = board[translate_output(child)]
-	(i,j) = action
 
-	target[i][j] = turn
+def result(board, action, turn):
 
-	return board, action #child
+	(k, i, j) = action
 
+	board[k][i][j] = turn
+
+	return board
 
 
 def toggle_turn(turn):
-	
+
 	if (turn == 'x'):
 		return 'o'
 
@@ -61,54 +77,61 @@ def toggle_turn(turn):
 
 
 
-#terminal state
 
-# terminal test on the child board of last placed action
-def terminal_test(main_board, previous_action): # 'd': draw  'o'/'x': winner  'n': not terminated
-
-	board = main_board[translate_output(previous_action)]
-
-
-	for row in board:
-		if (row[0] == row[1] == row[2] != '.'):
-			# print(111111)
-			return row[0]   #terminated with winner
-
-
-	for column in range(0, 3):
-		if (board[0][column] == board[1][column] == board[2][column] != '.'):
-			# print(22222)
-			return board[0][column]   #terminated with winner
-
-
-	if (board[0][0] == board[1][1] == board[2][2] != '.' or board[0][2] == board[1][1] == board[2][0] != '.'):
-		# print(33333)
-		return board[1][1]    #terminated with winner
-
+def terminal_test(main_board, previous_action):
+	if (previous_action == (-1,-1,-1)):
+		return 'n'
 
 	else:
-		flag = True
 
-		for i in range(0,3):
-			for j in range(0,3):
-				if (board[i][j] == '.'):
-					flag = False
+		(k,i,j) = previous_action
+		board = main_board[k]
 
-		if (flag == True):
-			# print(444444)
-			return 'd'       #if full board draw
+		for row in board:
+			if (row[0] == row[1] == row[2] != '.'):
+				# print(111111)
+				return row[0]   #terminated with winner
+
+
+		for column in range(0, 3):
+			if (board[0][column] == board[1][column] == board[2][column] != '.'):
+				# print(22222)
+				return board[0][column]   #terminated with winner
+
+
+		if (board[0][0] == board[1][1] == board[2][2] != '.' or board[0][2] == board[1][1] == board[2][0] != '.'):
+			# print(33333)
+			return board[1][1]    #terminated with winner
+
 
 		else:
-			# print(55555)
-			return 'n'       #if not full board (game not over)
+			flag = True
+
+			for i in range(0,3):
+				for j in range(0,3):
+					if (board[i][j] == '.'):
+						flag = False
+
+			if (flag == True):
+				# print(444444)
+				return 'd'       #if full board draw
+
+			else:
+				# print(55555)
+				return 'n'       #if not full board (game not over)
 
 
 
 
 
-def translate_output(action):      
+def translate_output(input_action):      
+	(input_k, input_i, input_j) = input_action
+	action = (input_i, input_j)
 
-	if (action == (0,0)):
+
+	if (action == (-1,-1)):
+		return -1
+	elif (action == (0,0)):
 		return 0
 	elif (action == (0,1)):
 		return 1
@@ -134,24 +157,64 @@ def translate_output(action):
 
 def print_board(board):
 	hold = ""
-	for rows in board:
-		hold = rows[0]+" "+rows[1]+ " "+ rows[2]
+	for i in range(0,3):
+		for k in range(0,3):
+			hold = hold + board[k][i][0] + " " + board[k][i][1] + " " + board[k][i][2] + "|"
 		print(hold)
+		hold = ""
+
+	print("")
+
+	for i in range(0,3):
+		for k in range(3,6):
+			hold = hold + board[k][i][0] + " " + board[k][i][1] + " " + board[k][i][2] + "|"
+		print(hold)
+		hold = ""
+
+	print("")
+
+	for i in range(0,3):
+		for k in range(6,9):
+			hold = hold + board[k][i][0] + " " + board[k][i][1] + " " + board[k][i][2] + "|"
+		print(hold)
+		hold = ""
+
+	print("")
 
 
 
+def translate_input(cell_number):      
 
-def valid_move(board, move, child):
-
-	target = board[translate_output(child)]
-
-	(i,j) = move
-	if (target[i][j] == '.'):
-		return True
-
+	if (cell_number == '1'):
+		return (0,0)
+	elif (cell_number == '2'):
+		return (0,1)
+	elif (cell_number == '3'):
+		return (0,2)
+	elif (cell_number == '4'):
+		return (1,0)
+	elif (cell_number == '5'):
+		return (1,1)
+	elif (cell_number == '6'):
+		return (1,2)
+	elif (cell_number == '7'):
+		return (2,0)
+	elif (cell_number == '8'):
+		return (2,1)
 	else:
+		return (2,2)	
+
+
+
+
+def valid_move(board, move): # checking input of 'human player'
+
+	(i,j) = translate_input(move[1])
+	if (board[int(move[0])-1][i][j] != '.'):
 		return False
 
+	else:
+		return True
 
 
 
