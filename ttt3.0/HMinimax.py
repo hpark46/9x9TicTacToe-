@@ -16,6 +16,7 @@ def alpha_beta(board, turn, player, child, depth):
 
 
 	for move in moves:
+		(k, i, j) = move
 
 							#    board                      turn            player   alphabeta     depth      
 		temp_util = min_value(result(board, move, turn), toggle_turn(turn), player, (alpha, beta), move, depth-1)
@@ -26,8 +27,9 @@ def alpha_beta(board, turn, player, child, depth):
 			action_index = flag_index  # if changed save best action's index
 
 		# undo result() and toggle_turn() 
-		(k, i, j) = move
+		
 		board[k][i][j] = '.'
+		# print(board)
 
 
 		alpha = max(alpha, best_util)
@@ -63,13 +65,14 @@ def max_value(board, turn, player, alphabeta, child, depth):
 			best_util = -math.inf   
 
 			for move in moves:
+				(k,i,j) = move
 
 														# board 					turn 		   player 	alphabeta 	  child  depth
 				best_util = max(best_util, min_value(result(board, move, turn), toggle_turn(turn), player, (alpha, beta), move, depth-1))
 
 
 				# undo result() and toggle_turn() 
-				(k,i,j) = move
+				
 				board[k][i][j] = '.'
 
 
@@ -108,11 +111,12 @@ def min_value(board, turn, player, alphabeta, child, depth):
 			worst_util = math.inf
 
 			for move in moves:
+				(k,i,j) = move
 
 				worst_util = min(worst_util, max_value(result(board, move, turn), toggle_turn(turn) , player, (alpha, beta), move, depth-1))
 
 				# undo result() and toggle_turn() 
-				(k,i,j) = move
+				
 				board[k][i][j] = '.'
 
 
@@ -139,33 +143,33 @@ def min_value(board, turn, player, alphabeta, child, depth):
 
 def eval(board, player):
 	player_score = 0
-	print(board)
+	# print(board)
 
 
 	for child in board: # k
 		if (not full_board(child)):     #full board skipped with value 0
 
 			for row in child:
-				eval_support(player_score, opponent_score, child[row], player)
+				eval_support(player_score, row, player)
 
 
 
 			for column in range(0,3):
-				eval_support(player_score, opponent_score, [child[0][column], child[1][column], child[2][column]] , player)
+				eval_support(player_score, [child[0][column], child[1][column], child[2][column]] , player)
 
 			#diagnal
-			eval_support(player_score, opponent_score, [child[0][0], child[1][1], child[2][2]] , player)
-			eval_support(player_score, opponent_score, [child[0][2], child[1][1], child[2][0]] , player)
+			eval_support(player_score, [child[0][0], child[1][1], child[2][2]] , player)
+			eval_support(player_score, [child[0][2], child[1][1], child[2][0]] , player)
 
 	return player_score
 
 
 
-def eval_support(player_score, opponent_score, line, player):
+def eval_support(player_score, line, player):
 
-	player_count = line.count(player)
-	opponent_count = line.count(toggle_turn(player))
-	dot_count = line.count('.')
+	player_count = np.count_nonzero(line == player)
+	opponent_count = np.count_nonzero(line == toggle_turn(player))
+	dot_count = np.count_nonzero(line == '.')
 
 
 	if (player_count == 1 and dot_count == 2):

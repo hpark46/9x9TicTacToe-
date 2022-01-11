@@ -33,20 +33,28 @@ def run():
 
 			if (child == (-1,-1,-1) or full_board(board[translate_output(child)])):    #can place anywhere  for starting turn or draw from previous action
 				x_move = input("please place a move anywhere: ")   #ex) 34
+				(temp_i, temp_j) = translate_input(x_move[1])
+				x_move = (int(x_move[0]) - 1, temp_i, temp_j)
 
 				while(not valid_move(board, x_move)):
 					x_move = input("please place a valid move anywhere: ")
+					(temp_i, temp_j) = translate_input(x_move[1])
+					x_move = (int(x_move[0]) - 1, temp_i, temp_j)
+
+
 
 
 
 			else: #specify the board for them referencing 'child' move
 				target = translate_output(child)
-				x_move = (target, input("please place a move on board number " + target + ": "))   #ex) 3
+				temp_move = translate_input(input("please place a move on board number " + str(target + 1) + ": "))   #ex) 3
+				x_move = (target, temp_move[0], temp_move[1])
 
 				while(not valid_move(board, x_move)):
-					x_move = input("please place a valid move on board number " + target + ": ")
+					temp_move = translate_input(input("please place a valid move on board number " + str(target + 1) + ": "))
+					x_move = (target, temp_move[0], temp_move[1])
 
-
+			# print(x_move)
 
 
 			board, turn, child = transition_model(board, x_move, 'x')  #player move
@@ -61,7 +69,7 @@ def run():
 			print_board(board)
 
 
-			o_move = alpha_beta(board, 'o', 'o', child, 20)   #minimax to computer's favor
+			o_move = alpha_beta(board, 'o', 'o', child, 10)   #minimax to computer's favor
 
 			board, turn, child = transition_model(board, o_move, 'o')
 
@@ -80,8 +88,8 @@ def run():
 
 			x_move = alpha_beta(board, 'x', 'x', child, 10)  #minimax to computer's favor
 
-			print(board)
-			print(x_move)
+			# print(board)
+			# print(x_move)
 			
 
 			board, turn, child = transition_model(board, x_move, 'x')
@@ -103,14 +111,19 @@ def run():
 				while(not valid_move(board, o_move)):
 					o_move = input("please place a valid move anywhere: ")
 
+				(temp_i, temp_j) = translate_input(o_move[1])
+				o_move = (int(o_move[0]) - 1, temp_i, temp_j)
+
 
 
 			else: #specify the board for them referencing 'child' move
 				target = translate_output(child)
-				o_move = (target, input("please place a move on board number " + str(target) + ": "))   #ex) 3
+				temp_move = translate_input(input("please place a move on board number " + str(target + 1) + ": "))   #ex) 3
+				o_move = (target, temp_move[0], temp_move[1])
 
 				while(not valid_move(board, o_move)):
-					o_move = input("please place a valid move on board number " + str(target) + ": ")
+					temp_move = translate_input(input("please place a valid move on board number " + str(target + 1) + ": "))
+					o_move = (target, temp_move[0], temp_move[1])
 
 
 

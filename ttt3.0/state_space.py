@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 #state
 def initialize(playtype):   #input x or o
@@ -7,6 +8,8 @@ def initialize(playtype):   #input x or o
 	cell = [['.', '.', '.'],['.', '.', '.'],['.', '.', '.']]      #[k][i][j]
 	for num in range(0,9):
 		board.append(cell)
+
+	board = np.array(board)
 
 
 	turn = 'x'
@@ -53,6 +56,7 @@ def actions(board, child):     # board, previous action performed (k,i,j)
 def transition_model(board, action, turn):
 
 	#      updated board 				toggled turn       performed action
+	# print(result(board, action,))
 	return result(board, action, turn), toggle_turn(turn), action    
 
 
@@ -60,9 +64,15 @@ def transition_model(board, action, turn):
 
 def result(board, action, turn):
 
-	(k, i, j) = action
+	(k,i,j) = action
+	# print((k,i,j))
+	# print_board(board)
+	# print("*******")
 
 	board[k][i][j] = turn
+	# print(board)
+	# print_board(board)
+	# print("+++++++++")
 
 	return board
 
@@ -209,8 +219,8 @@ def translate_input(cell_number):
 
 def valid_move(board, move): # checking input of 'human player'
 
-	(i,j) = translate_input(move[1])
-	if (board[int(move[0])-1][i][j] != '.'):
+	(k,i,j) = move
+	if (board[k][i][j] != '.'):
 		return False
 
 	else:
